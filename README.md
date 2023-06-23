@@ -378,6 +378,9 @@ Execution Time (std) 0.1819 seconds
 
 ## Conclusions
 
+In conclusion, this repository provides an ML solution to calculate the probability of delays in arrival or departure for flights departing from Santiago de Chile. The solution utilizes Scikit-Learn as the main library for creating the models, FastAPI for serving the models as an inference API, and Mangum to create an AWS Lambda function with the code.
+
+### Performance of the model
 The model can be improved in several ways to enhance its predictive performance. Here are some potential avenues for improvement:
 
 1. **Feature Engineering**: The current model utilizes a set of predefined features to predict flight delays. However, there may be additional features or derived features that could provide valuable information for the prediction task. Exploring and incorporating relevant features such as weather conditions, airline-specific factors, or airport congestion levels could potentially improve the model's accuracy.
@@ -385,3 +388,26 @@ The model can be improved in several ways to enhance its predictive performance.
 2. **Data Augmentation**: Increasing the size and diversity of the training dataset can help improve the model's generalization and predictive power. Additional historical flight data from various sources or time periods could be incorporated to enhance the dataset and capture a wider range of scenarios and patterns.
 
 3. **Model Selection and Hyperparameter Tuning**: While the logistic regression and SVC models were tested in this repository, other machine learning algorithms or even ensemble methods could be explored to find a model that better captures the underlying patterns and relationships in the data. Additionally, performing a thorough hyperparameter search and tuning process could optimize the model's performance.
+
+4. **Addressing Class Imbalance**: If there is a significant class imbalance in the dataset (i.e., a large majority of non-delayed flights compared to delayed flights), the model's performance may be biased towards the majority class. Techniques such as oversampling the minority class (delayed flights) or adjusting class weights during training can help mitigate this imbalance and improve the model's ability to correctly predict delayed flights.
+
+5. **Model Ensemble**: Combining multiple models through ensemble methods, such as stacking, bagging, or boosting, can often lead to improved performance. By leveraging the strengths of different models and aggregating their predictions, an ensemble model can provide more accurate and robust predictions.
+
+By pursuing these avenues for improvement and continuously iterating on the model, it is possible to enhance its accuracy, robustness, and ability to predict flight delays more effectively.
+
+### Performance of the API
+
+The local testing produces good results, but the implementation of the lambda docker with API gateway introduces some overhead.
+
+1. API Gateway Overhead:
+
+ - **Network Latency**: API Gateway acts as a proxy between clients and backend services. Every request and response passes through API Gateway, introducing a small amount of additional network latency compared to direct communication with the backend.
+ - **Request/Response Transformation**: API Gateway can perform request and response transformations, such as header manipulation or payload formatting. These transformations add processing time and can introduce additional overhead, especially for complex transformations or large payloads.
+ - **API Gateway Endpoint Resolution**: When a request reaches API Gateway, it needs to resolve the target endpoint to forward the request to the appropriate backend service. This resolution process may involve DNS lookups, load balancing decisions, or custom routing configurations, which can introduce some overhead.
+
+2. Lambda with Docker Overhead:
+- **Cold Starts**: When a Lambda function is invoked for the first time or after a period of inactivity, there may be a noticeable delay known as a "cold start." Cold starts occur because the underlying infrastructure needs to provision and initialize a new container for the function. This initialization process includes loading the Docker container, executing startup code, and potentially fetching dependencies, resulting in increased response times for the initial request.
+- **Container Startup Time**: The use of Docker containers in Lambda introduces additional startup time compared to native Lambda functions. The container image needs to be pulled from a container registry, which adds some overhead during the container initialization process.
+- **Container Size and Memory**: Docker containers come with additional size and memory overhead compared to traditional Lambda functions. The container image and runtime environment consume storage and memory resources, potentially leading to increased resource utilization and costs.
+
+It's worth noting that the overhead associated with API Gateway and Lambda with Docker containers is typically minimal and often outweighed by the benefits they provide, such as scalability, ease of deployment, and simplified management.
