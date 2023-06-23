@@ -1,0 +1,6 @@
+mangum
+uvicorn
+fastapi
+requests
+fastparquet
+python-dotenv
