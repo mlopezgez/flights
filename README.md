@@ -356,25 +356,24 @@ curl --location 'https://<UNIQUE-IDENTIFIER>.execute-api.us-east-1.amazonaws.com
 
 This section explains how a stress test was performed on the API.
 
-100 requests were sent to the API locally and using API Gateway.
+We use locust to send 50000 requests in 45 seconds to the API locally and using API Gateway.
 
 ### Locally
 
 The results for the API running locally with `uvicorn` are as follows:
 
-```bash
-Execution Time (mean) 0.0042 seconds
-Execution Time (std) 0.0012 seconds
-```
+<p align="center">
+    <img src="./assets/stress_local.png" width="500">
+</p>
+
 
 ### API Gateway
 
 The results for the API running in AWS are as follows:
 
-```bash
-Execution Time (mean) 0.4560 seconds
-Execution Time (std) 0.1819 seconds
-```
+<p align="center">
+    <img src="./assets/stress_api_gateway.png" width="500">
+</p>
 
 ## Conclusions
 
