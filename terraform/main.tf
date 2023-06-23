@@ -10,7 +10,14 @@ module "flights_repository" {
 }
 
 module "flights_lambda" {
-  source = "./modules/lambda"
+  source        = "./modules/lambda"
   function_name = "flights"
-  image_url = module.flights_repository.repository_url
+  image_url     = module.flights_repository.repository_url
+}
+
+module "flights_api" {
+  source            = "./modules/api"
+  name              = "flights"
+  function_name     = "flights"
+  lambda_invoke_arn = module.flights_lambda.lambda_invoke_arn
 }
