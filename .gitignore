@@ -3,4 +3,9 @@
 .idea
 .vscode
 .DS_Store
+
+.terraform
+.terraform.lock.hcl
+
 __pycache__
+secrets.auto.tfvars
