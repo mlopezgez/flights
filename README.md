@@ -100,3 +100,254 @@ Precision: 0.819767
 Recall: 0.992958
 F1: 0.898089
 ```
+
+## The API
+
+I used FastAPI to create the inference API. This API has two endpoints:
+- `arrivals`
+- `departures`
+
+To test the API locally you need to follow the next steps:
+
+1. Install requirements
+```
+pip install -r requirements.txt
+```
+2. Run the API with `uvicorn`
+```
+uvicorn app.main:app --reload
+```
+
+#### Query example:
+
+You can use cURL to test the API
+```bash
+curl --location 'localhost:8000/arrivals' \
+--header 'Content-Type: application/json' \
+--data '{
+    "airline_iata": "AV",
+    "iata_arrival": "BOG",
+    "flight_day": 21,
+    "flight_month": 6,
+    "flight_year": 2023
+}'
+```
+Reponse Example:
+```json
+{
+    "probability": 0.8779077133227141,
+    "prediction": 1
+}
+```
+
+Here, if the probability is greater than 0.5, the prediction shows that the flight will be delayed.
+
+Check the API documentation in the following endpoint:
+
+```bash
+http://localhost:8000/docs
+```
+
+### Testing with Docker
+
+Build the image:
+
+```bash
+docker build -t flights -f ./docker/Dockerfile .
+```
+
+Run the image:
+```bash
+docker run --rm -p 9000:8080 flights:latest
+```
+
+The Dockerfile provided in this repository is intended to run inside a lambda function, therefore to test locally the cURL query is different:
+
+```bash
+curl --location 'http://localhost:9000/2015-03-31/functions/function/invocations' \
+--header 'Content-Type: application/json' \
+--data '{
+    "resource": "/arrivals",
+    "path": "/arrivals",
+    "httpMethod": "POST",
+    "headers": {
+        "Accept": "*/*",
+        "Accept-Encoding": "gzip, deflate",
+        "cache-control": "no-cache",
+        "CloudFront-Forwarded-Proto": "https",
+        "CloudFront-Is-Desktop-Viewer": "true",
+        "CloudFront-Is-Mobile-Viewer": "false",
+        "CloudFront-Is-SmartTV-Viewer": "false",
+        "CloudFront-Is-Tablet-Viewer": "false",
+        "CloudFront-Viewer-Country": "US",
+        "Content-Type": "application/json",
+        "headerName": "headerValue",
+        "Host": "gy415nuibc.execute-api.us-east-1.amazonaws.com",
+        "Postman-Token": "9f583ef0-ed83-4a38-aef3-eb9ce3f7a57f",
+        "User-Agent": "PostmanRuntime/2.4.5",
+        "Via": "1.1 d98420743a69852491bbdea73f7680bd.cloudfront.net (CloudFront)",
+        "X-Amz-Cf-Id": "pn-PWIJc6thYnZm5P0NMgOUglL1DYtl0gdeJky8tqsg8iS_sgsKD1A==",
+        "X-Forwarded-For": "54.240.196.186, 54.182.214.83",
+        "X-Forwarded-Port": "443",
+        "X-Forwarded-Proto": "https"
+    },
+    "multiValueHeaders": {
+        "Accept": [
+            "*/*"
+        ],
+        "Accept-Encoding": [
+            "gzip, deflate"
+        ],
+        "cache-control": [
+            "no-cache"
+        ],
+        "CloudFront-Forwarded-Proto": [
+            "https"
+        ],
+        "CloudFront-Is-Desktop-Viewer": [
+            "true"
+        ],
+        "CloudFront-Is-Mobile-Viewer": [
+            "false"
+        ],
+        "CloudFront-Is-SmartTV-Viewer": [
+            "false"
+        ],
+        "CloudFront-Is-Tablet-Viewer": [
+            "false"
+        ],
+        "CloudFront-Viewer-Country": [
+            "US"
+        ],
+        "": [
+            ""
+        ],
+        "Content-Type": [
+            "application/json"
+        ],
+        "headerName": [
+            "headerValue"
+        ],
+        "Host": [
+            "gy415nuibc.execute-api.us-east-1.amazonaws.com"
+        ],
+        "Postman-Token": [
+            "9f583ef0-ed83-4a38-aef3-eb9ce3f7a57f"
+        ],
+        "User-Agent": [
+            "PostmanRuntime/2.4.5"
+        ],
+        "Via": [
+            "1.1 d98420743a69852491bbdea73f7680bd.cloudfront.net (CloudFront)"
+        ],
+        "X-Amz-Cf-Id": [
+            "pn-PWIJc6thYnZm5P0NMgOUglL1DYtl0gdeJky8tqsg8iS_sgsKD1A=="
+        ],
+        "X-Forwarded-For": [
+            "54.240.196.186, 54.182.214.83"
+        ],
+        "X-Forwarded-Port": [
+            "443"
+        ],
+        "X-Forwarded-Proto": [
+            "https"
+        ]
+    },
+    "queryStringParameters": {},
+    "multiValueQueryStringParameters": {},
+    "pathParameters": {},
+    "stageVariables": {
+        "stageVariableName": "stageVariableValue"
+    },
+    "requestContext": {
+        "accountId": "12345678912",
+        "resourceId": "roq9wj",
+        "stage": "testStage",
+        "requestId": "deef4878-7910-11e6-8f14-25afc3e9ae33",
+        "identity": {
+            "cognitoIdentityPoolId": null,
+            "accountId": null,
+            "cognitoIdentityId": null,
+            "caller": null,
+            "apiKey": null,
+            "sourceIp": "192.168.196.186",
+            "cognitoAuthenticationType": null,
+            "cognitoAuthenticationProvider": null,
+            "userArn": null,
+            "userAgent": "PostmanRuntime/2.4.5",
+            "user": null
+        },
+        "resourcePath": "/arrivals/",
+        "httpMethod": "GET",
+        "apiId": "gy415nuibc"
+    },
+    "body": "{\"airline_iata\":\"AV\", \"iata_arrival\": \"BOG\",\"flight_day\": 21,\"flight_month\": 6,\"flight_year\": 2023}",
+    "isBase64Encoded": false
+}'
+```
+
+And the response should look like:
+
+```json
+{
+  "statusCode": 200,
+  "headers": {
+    "content-length": "48",
+    "content-type": "application/json"
+  },
+  "multiValueHeaders": {},
+  "body": "{\"probability\":0.877907713322714,\"prediction\":1}",
+  "isBase64Encoded": false
+}
+```
+
+## Bulding the Infrastructure in AWS
+
+To build the infrastructure in AWS we use Terraform.
+
+First, create a `secrets.auto.tfvars` file inside the terraform folder with the following contents:
+
+```bash
+access_key = "<YOUR-ACCESS-KEY>"
+secret_key = "<YOUR-SECRET-KEY>"
+```
+
+Then:
+
+```bash
+cd terraform
+terraform apply
+```
+
+The first apply will fail but it will create the ECR repository. Then you need to run the GitHub Action script in the repository. Be sure to set your secrets in the repository.
+
+```bash
+AWS_ACCESS_KEY_ID: <YOUR-ACCESS-KEY> 
+AWS_SECRET_ACCESS_KEY: <YOUR-SECRET-KEY>
+```
+
+After setting the secrets run the action and the image will be pushed to ECR. Then run `terraform apply` again.
+
+Now you have the API running on AWS! You can query it using the URL provided by API Gateway.
+
+Go to: API Gateway > flights > stages > dev
+
+You should see an URL that looks like:
+
+```bash
+https://<UNIQUE-IDENTIFIER>.execute-api.us-east-1.amazonaws.com/dev
+```
+
+Then you can query the endpoints with:
+
+```bash
+curl --location 'https://<UNIQUE-IDENTIFIER>.execute-api.us-east-1.amazonaws.com/dev/arrivals' \
+--header 'Content-Type: application/json' \
+--data '{
+    "airline_iata": "AV",
+    "iata_arrival": "BOG",
+    "flight_day": 21,
+    "flight_month": 6,
+    "flight_year": 2023
+}'
+```
