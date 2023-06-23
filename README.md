@@ -351,3 +351,37 @@ curl --location 'https://<UNIQUE-IDENTIFIER>.execute-api.us-east-1.amazonaws.com
     "flight_year": 2023
 }'
 ```
+
+## API Stress Test
+
+This section explains how a stress test was performed on the API.
+
+100 requests were sent to the API locally and using API Gateway.
+
+### Locally
+
+The results for the API running locally with `uvicorn` are as follows:
+
+```bash
+Execution Time (mean) 0.0042 seconds
+Execution Time (std) 0.0012 seconds
+```
+
+### API Gateway
+
+The results for the API running in AWS are as follows:
+
+```bash
+Execution Time (mean) 0.4560 seconds
+Execution Time (std) 0.1819 seconds
+```
+
+## Conclusions
+
+The model can be improved in several ways to enhance its predictive performance. Here are some potential avenues for improvement:
+
+1. **Feature Engineering**: The current model utilizes a set of predefined features to predict flight delays. However, there may be additional features or derived features that could provide valuable information for the prediction task. Exploring and incorporating relevant features such as weather conditions, airline-specific factors, or airport congestion levels could potentially improve the model's accuracy.
+
+2. **Data Augmentation**: Increasing the size and diversity of the training dataset can help improve the model's generalization and predictive power. Additional historical flight data from various sources or time periods could be incorporated to enhance the dataset and capture a wider range of scenarios and patterns.
+
+3. **Model Selection and Hyperparameter Tuning**: While the logistic regression and SVC models were tested in this repository, other machine learning algorithms or even ensemble methods could be explored to find a model that better captures the underlying patterns and relationships in the data. Additionally, performing a thorough hyperparameter search and tuning process could optimize the model's performance.
