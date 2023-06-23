@@ -1,6 +1,8 @@
+joblib
 mangum
 uvicorn
 fastapi
 requests
 fastparquet
+scikit-learn
 python-dotenv
