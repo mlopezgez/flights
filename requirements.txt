@@ -1,5 +1,6 @@
 joblib
 mangum
+locus
 uvicorn
 fastapi
 requests
