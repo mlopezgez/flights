@@ -4,7 +4,13 @@ provider "aws" {
   region     = var.region
 }
 
-module "flights-repository" {
+module "flights_repository" {
   source = "./modules/ecr"
   name   = "flights"
+}
+
+module "flights_lambda" {
+  source = "./modules/lambda"
+  function_name = "flights"
+  image_url = module.flights_repository.repository_url
 }
