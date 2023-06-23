@@ -1,128 +1,102 @@
 # Flights
 
+## Introduction
+
+This repository provides an ML solution to calculate the probability of delays in arrival or departure for flights that depart from Santiago de Chile.
+
+It uses Scikit-Learn as the main library for creating the model, Fast-API to serve, and Mangum to create an AWS lambda function with the code.
+
+It also uses terraform to define the infrastructure needed.
+
 <img src="./assets/infrastructure.png">
 
-## Example Request
+This infrastructure uses an API Gateway as an entry point, a serverless solution ensuring scalability.
 
+Then, a Lambda Function is responsible for loading the model and running inference.
+
+The Lambda uses a Docker image with the code, and we store this image in ECR.
+
+A CI/CD process is implemented with GitHub Actions, which builds the image and pushes it to ECR.
+
+## The Data
+
+I fetched data from [Aviation Stack](https://aviationstack.com/). This API haves historical data on previous flights.
+
+I built a dataset of 1,000 samples for flights that depart from SCL.
+
+The data is stored as a Parquet file in the folder data of this repository.
+
+The columns of interest for my experiments were:
+
+```
+[
+    'flight_number',
+    'airline_iata',
+    'iata_departure',
+    'scheduled_departure',
+    'actual_departure',
+    'iata_arrival',
+    'scheduled_arrival',
+    'actual_arrival',
+    'delay_departure',
+    'delay_arrival',
+    'flight_day',
+    'flight_month',
+    'flight_year',
+    'delayed_departure',
+    'delayed_arrival'
+]
+```
+
+Here, I assumed the flight would be delayed if the delay was greater than 25 minutes. This assumption applies to arrivals and departures.
+
+## The Model
+
+I tested two machine-learning models:
+- SVC.
+- Logistic Regression.
+
+The best results for each problem (arrivals and departures) were:
+- Logistic Regression for Departures
+- SVC for Arrivals
+
+The models are defined in the following way:
+
+There are two preprocessing steps:
+
+- One Hot Encoding (For categorical variables)
+- Standar Scaler (For numerical variables)
+
+### Departures Model
+
+The model for departures is as follows:
+
+<p align="center">
+    <img src="./assets/departures.png" width="250">
+</p>
+
+Metrics obtained:
 
 ```bash
-curl --location 'http://localhost:9000/2015-03-31/functions/function/invocations' \
---header 'Content-Type: application/json' \
---data '{
-    "resource": "/arrivals",
-    "path": "/arrivals",
-    "httpMethod": "POST",
-    "headers": {
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate",
-        "cache-control": "no-cache",
-        "CloudFront-Forwarded-Proto": "https",
-        "CloudFront-Is-Desktop-Viewer": "true",
-        "CloudFront-Is-SmartTV-Viewer": "false",
-        "CloudFront-Is-Tablet-Viewer": "false",
-        "CloudFront-Viewer-Country": "US",
-        "Content-Type": "application/json",
-        "headerName": "headerValue",
-        "Host": "gy415nuibc.execute-api.us-east-1.amazonaws.com",
-        "Postman-Token": "9f583ef0-ed83-4a38-aef3-eb9ce3f7a57f",
-        "User-Agent": "PostmanRuntime/2.4.5",
-        "Via": "1.1 d98420743a69852491bbdea73f7680bd.cloudfront.net (CloudFront)",
-        "X-Amz-Cf-Id": "pn-PWIJc6thYnZm5P0NMgOUglL1DYtl0gdeJky8tqsg8iS_sgsKD1A==",
-        "X-Forwarded-For": "54.240.196.186, 54.182.214.83",
-        "X-Forwarded-Port": "443",
-        "X-Forwarded-Proto": "https"
-    },
-    "multiValueHeaders": {
-        "Accept": [
-            "*/*"
-        ],
-        "Accept-Encoding": [
-            "gzip, deflate"
-        ],
-        "cache-control": [
-            "no-cache"
-        ],
-        "CloudFront-Forwarded-Proto": [
-            "https"
-        ],
-        "CloudFront-Is-Desktop-Viewer": [
-            "true"
-        ],
-        "CloudFront-Is-Mobile-Viewer": [
-            "false"
-        ],
-        "CloudFront-Is-SmartTV-Viewer": [
-            "false"
-        ],
-        "CloudFront-Is-Tablet-Viewer": [
-            "false"
-        ],
-        "CloudFront-Viewer-Country": [
-            "US"
-        ],
-        "": [
-            ""
-        ],
-        "Content-Type": [
-            "application/json"
-        ],
-        "headerName": [
-            "headerValue"
-        ],
-        "Host": [
-            "gy415nuibc.execute-api.us-east-1.amazonaws.com"
-        ],
-        "Postman-Token": [
-            "9f583ef0-ed83-4a38-aef3-eb9ce3f7a57f"
-        ],
-        "User-Agent": [
-            "PostmanRuntime/2.4.5"
-        ],
-        "Via": [
-            "1.1 d98420743a69852491bbdea73f7680bd.cloudfront.net (CloudFront)"
-        ],
-        "X-Amz-Cf-Id": [
-            "pn-PWIJc6thYnZm5P0NMgOUglL1DYtl0gdeJky8tqsg8iS_sgsKD1A=="
-        ],
-        "X-Forwarded-For": [
-            "54.240.196.186, 54.182.214.83"
-        ],
-        "X-Forwarded-Port": [
-            "443"
-        ],
-        "X-Forwarded-Proto": [
-            "https"
-        ]
-    },
-    "queryStringParameters": {},
-    "multiValueQueryStringParameters": {},
-    "pathParameters": {},
-    "stageVariables": {
-        "stageVariableName": "stageVariableValue"
-    },
-    "requestContext": {
-        "accountId": "12345678912",
-        "resourceId": "roq9wj",
-        "stage": "testStage",
-        "requestId": "deef4878-7910-11e6-8f14-25afc3e9ae33",
-        "identity": {
-            "cognitoIdentityPoolId": null,
-            "accountId": null,
-            "cognitoIdentityId": null,
-            "caller": null,
-            "apiKey": null,
-            "sourceIp": "192.168.196.186",
-            "cognitoAuthenticationType": null,
-            "cognitoAuthenticationProvider": null,
-            "userArn": null,
-            "userAgent": "PostmanRuntime/2.4.5",
-            "user": null
-        },
-        "resourcePath": "/arrivals/",
-        "httpMethod": "GET",
-        "apiId": "gy415nuibc"
-    },
-    "body": "{\"airline_iata\":\"AV\", \"iata_arrival\": \"BOG\",\"flight_day\": 21,\"flight_month\": 6,\"flight_year\": 2023}",
-    "isBase64Encoded": false
-}'
+Accuracy: 0.833333
+Precision: 0.833333
+Recall: 0.365854
+F1: 0.508475
+```
+
+### Arrivals Model
+
+The model for arrivals is as follows:
+
+<p align="center">
+    <img src="./assets/arrivals.png" width="250">
+</p>
+
+Metrics obtained:
+
+```bash
+Accuracy: 0.816092
+Precision: 0.819767
+Recall: 0.992958
+F1: 0.898089
 ```
